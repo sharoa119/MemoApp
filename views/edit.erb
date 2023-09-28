@@ -1,9 +1,9 @@
 <form action="/memos/<%= params[:id] %>" method="post">
 <label for="title">title</label><br>
-<input type="text" name="title" style="width:150px; height:30px;" value="<%= @title %>">
+<input type="text" name="title" style="width:150px; height:30px;" value="<%= CGI.escapeHTML(@title) %>">
 <p>
 <label for="content">content</label><br>
-<textarea name="content" style="width:300px; height:200px;" cols="40" rows="8"><%= @content %></textarea>
+<textarea name="content" style="width:300px; height:200px;" cols="40" rows="8"><%= CGI.escapeHTML(@content).gsub("\n", '<br>') %></textarea>
 <input type="hidden" name="_method" value="patch">
 <input style="color:Fuchsia;" type="submit" value="Go">
 </p>

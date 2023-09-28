@@ -7,7 +7,7 @@ require 'cgi'
 
 PATH = 'public/memoapp.json'
 
-def memos(path)
+def load_memos(path)
   File.open(path) do |file|
     JSON.parse(file.read)
   end
@@ -18,13 +18,13 @@ get '/' do
 end
 
 get '/memos' do
-  @memos = memos(PATH)
+  @memos = load_memos(PATH)
   erb :index
 end
 
 get '/memos/:id' do
   id = params[:id]
-  memos = memos(PATH)
+  memos = load_memos(PATH)
 
   memo = memos.find { |m| m['id'] == id }
   if memo
@@ -32,7 +32,7 @@ get '/memos/:id' do
     @content = memo['content']
     erb :detail
   else
-    '<font size="7">Not Found(x_x)</font>'
+    status 404
   end
 end
 
@@ -40,7 +40,7 @@ get '/new' do
   erb :newentry
 end
 
-def register(path, memos)
+def save_memos(path, memos)
   File.open(path, 'wb') do |file|
     JSON.dump(memos, file)
   end
@@ -48,7 +48,7 @@ end
 
 post '/memos' do
   maxid = 0
-  memos = memos(PATH)
+  memos = load_memos(PATH)
   memos.each do |m|
     id = m['id'].to_i
     maxid = id if id > maxid
@@ -61,14 +61,14 @@ post '/memos' do
   }
 
   memos << new_memo
-  register(PATH, memos)
+  save_memos(PATH, memos)
 
   redirect '/memos'
 end
 
 get '/memos/:id/edit' do
   id = params[:id]
-  memos = memos(PATH)
+  memos = load_memos(PATH)
 
   memo = memos.find { |m| m['id'] == id }
 
@@ -79,14 +79,14 @@ end
 
 patch '/memos/:id' do
   id = params[:id]
-  memos = memos(PATH)
+  memos = load_memos(PATH)
 
   memo = memos.find { |m| m['id'] == id }
   if memo
     memo['title'] = params[:title]
     memo['content'] = params[:content]
 
-    register(PATH, memos)
+    save_memos(PATH, memos)
   end
 
   redirect "/memos/#{id}"
@@ -94,15 +94,15 @@ end
 
 delete '/memos/:id' do
   id = params[:id]
-  memos = memos(PATH)
+  memos = load_memos(PATH)
 
   memos.reject! { |m| m['id'] == id }
 
-  register(PATH, memos)
+  save_memos(PATH, memos)
 
   redirect '/memos'
 end
 
-get '/*' do
-  '<font size="7">Not Found(x_x)</font>'
+not_found do
+  'This is nowhere to be found.'
 end
