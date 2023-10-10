@@ -2,18 +2,15 @@
 
 require 'sinatra'
 require 'sinatra/reloader'
+require 'json'
 require 'cgi'
-require 'pg'
-require 'dotenv/load'
 
-configure do
-  set :db, PG.connect(
-    host: ENV['DB_HOST'],
-    user: ENV['DB_USER'],
-    password: ENV['DB_PASSWORD'],
-    dbname: ENV['DB_NAME']
-  )
-  set :memos, settings.db.exec('SELECT * FROM memos').to_a
+PATH = 'public/memoapp.json'
+
+def load_memos(path)
+  File.open(path) do |file|
+    JSON.parse(file.read)
+  end
 end
 
 get '/' do
@@ -21,13 +18,15 @@ get '/' do
 end
 
 get '/memos' do
-  @memos = settings.memos
+  @memos = load_memos(PATH)
   erb :index
 end
 
 get '/memos/:id' do
   id = params[:id]
-  memo = settings.memos.find { |m| m['id'] == id }
+  memos = load_memos(PATH)
+
+  memo = memos.find { |m| m['id'] == id }
   if memo
     @title = memo['title']
     @content = memo['content']
@@ -41,9 +40,16 @@ get '/new' do
   erb :newentry
 end
 
+def save_memos(path, memos)
+  File.open(path, 'wb') do |file|
+    JSON.dump(memos, file)
+  end
+end
+
 post '/memos' do
   maxid = 0
-  settings.memos.each do |m|
+  memos = load_memos(PATH)
+  memos.each do |m|
     id = m['id'].to_i
     maxid = id if id > maxid
   end
@@ -54,15 +60,18 @@ post '/memos' do
     'content' => params[:content]
   }
 
-  settings.memos << new_memo
-  settings.db.exec_params('INSERT INTO memos (title, content) VALUES ($1, $2)', [new_memo['title'], new_memo['content']])
+  memos << new_memo
+  save_memos(PATH, memos)
 
   redirect '/memos'
 end
 
 get '/memos/:id/edit' do
   id = params[:id]
-  memo = settings.memos.find { |m| m['id'] == id }
+  memos = load_memos(PATH)
+
+  memo = memos.find { |m| m['id'] == id }
+
   @title = memo['title']
   @content = memo['content']
   erb :edit
@@ -70,13 +79,14 @@ end
 
 patch '/memos/:id' do
   id = params[:id]
-  memo = settings.memos.find { |m| m['id'] == id }
+  memos = load_memos(PATH)
 
+  memo = memos.find { |m| m['id'] == id }
   if memo
     memo['title'] = params[:title]
     memo['content'] = params[:content]
 
-    settings.db.exec_params('UPDATE memos SET title = $1, content = $2 WHERE id = $3', [memo['title'], memo['content'], id])
+    save_memos(PATH, memos)
   end
 
   redirect "/memos/#{id}"
@@ -84,12 +94,15 @@ end
 
 delete '/memos/:id' do
   id = params[:id]
-  settings.memos.reject! { |m| m['id'] == id }
-  settings.db.exec_params('DELETE FROM memos WHERE id = $1', [id])
+  memos = load_memos(PATH)
+
+  memos.reject! { |m| m['id'] == id }
+
+  save_memos(PATH, memos)
 
   redirect '/memos'
 end
 
 not_found do
-  'Page not found!'
+  'This is nowhere to be found.'
 end
