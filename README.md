@@ -25,8 +25,11 @@ After moving to Public, first run the following to install the necessary gems.
 ```bash
 bundle install
 ```
-Once installed, run the following command.
-
+After installation is complete, run the following command to set environment variables (temporary).
+```bash
+export RACK_ENV=development
+```
+Launch the application.
 ```bash
  bundle exec ruby memoapp.rb
 ```

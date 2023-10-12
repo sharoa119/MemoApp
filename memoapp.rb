@@ -6,31 +6,15 @@ require 'cgi'
 require 'pg'
 require 'yaml'
 
-development_config = YAML.load(File.read('database.yml'))['development']
-
-production_config = YAML.load(File.read('database.yml'))['production']
-
-configure :development do
-  set :db, PG.connect(
-    host: development_config['db_host'],
-    port: development_config['db_port'],
-    user: development_config['db_user'],
-    password: development_config['db_password'],
-    dbname: development_config['db_name']
-  )
-end
-
-configure :production do
-  set :db, PG.connect(
-    host: production_config['db_host'],
-    port: production_config['db_port'],
-    user: production_config['db_user'],
-    password: production_config['db_password'],
-    dbname: production_config['db_name']
-  )
-end
-
 configure do
+  db_settings = YAML.load(File.read('database.yml'))[ENV['RACK_ENV']]
+  set :db, PG.connect(
+    host: db_settings['db_host'],
+    port: db_settings['db_port'],
+    user: db_settings['db_user'],
+    password: db_settings['db_password'],
+    dbname: db_settings['db_name']
+  )
   set :memos, settings.db.exec('SELECT * FROM memos').to_a
 end
 
