@@ -3,12 +3,12 @@
 source 'https://rubygems.org'
 
 # gem "rails"
+gem 'dotenv'
 gem 'erb_lint', require: false
+gem 'pg'
 gem 'sinatra'
 gem 'sinatra-contrib'
 gem 'webrick'
-gem 'pg'
-gem 'dotenv'
 
 # For plain Ruby scripts
 group :development do

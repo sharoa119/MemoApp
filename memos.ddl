@@ -1,5 +1,5 @@
-CREATE TABLE public.memos (
-    id integer NOT NULL,
-    title character varying(100),
-    content character varying(500)
+CREATE TABLE memos (
+  id serial PRIMARY KEY,
+  title character varying,
+  content character varying
 );

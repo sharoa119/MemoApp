@@ -20,6 +20,10 @@ get '/' do
   redirect '/memos'
 end
 
+get '/memos/new' do
+  erb :newentry
+end
+
 get '/memos' do
   @memos = settings.memos
   erb :index
@@ -37,11 +41,7 @@ get '/memos/:id' do
   end
 end
 
-get '/new' do
-  erb :newentry
-end
-
-post '/memos' do
+post '/memos/new' do
   maxid = 0
   settings.memos.each do |m|
     id = m['id'].to_i
