@@ -21,8 +21,11 @@ clone from github, and then Go to Public directory.
 git clone https://github.com/sharoa119/Public.git
 cd Public
 ```
-Once moved, run the following.
-
+After moving to Public, first run the following to install the necessary gems.
+```bash
+bundle install
+```
+Once installed, run the following command:
 ```bash
  bundle exec ruby memoapp.rb
 ```
