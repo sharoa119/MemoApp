@@ -31,9 +31,9 @@ export RACK_ENV=development
 ```
 Launch the application.
 ```bash
- bundle exec ruby memoapp.rb
+bundle exec ruby memoapp.rb
 ```
-After execution, when accessing `http://127.0.0.1:4567/`
+After execution, when accessing `http://localhost:4567/`
 MemoApp will be displayed.
 Click New to create a new memo.
 After displaying a specific memo, you can edit it with Edit or delete it with Delete.
