@@ -25,7 +25,8 @@ After moving to Public, first run the following to install the necessary gems.
 ```bash
 bundle install
 ```
-Once installed, run the following command:
+Once installed, run the following command.
+
 ```bash
  bundle exec ruby memoapp.rb
 ```

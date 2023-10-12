@@ -4,15 +4,33 @@ require 'sinatra'
 require 'sinatra/reloader'
 require 'cgi'
 require 'pg'
-require 'dotenv/load'
+require 'yaml'
+
+development_config = YAML.load(File.read('database.yml'))['development']
+
+production_config = YAML.load(File.read('database.yml'))['production']
+
+configure :development do
+  set :db, PG.connect(
+    host: development_config['db_host'],
+    port: development_config['db_port'],
+    user: development_config['db_user'],
+    password: development_config['db_password'],
+    dbname: development_config['db_name']
+  )
+end
+
+configure :production do
+  set :db, PG.connect(
+    host: production_config['db_host'],
+    port: production_config['db_port'],
+    user: production_config['db_user'],
+    password: production_config['db_password'],
+    dbname: production_config['db_name']
+  )
+end
 
 configure do
-  set :db, PG.connect(
-    host: ENV['DB_HOST'],
-    user: ENV['DB_USER'],
-    password: ENV['DB_PASSWORD'],
-    dbname: ENV['DB_NAME']
-  )
   set :memos, settings.db.exec('SELECT * FROM memos').to_a
 end
 
