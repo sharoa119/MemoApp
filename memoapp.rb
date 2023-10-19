@@ -6,6 +6,15 @@ require 'cgi'
 require 'pg'
 require 'yaml'
 
+def load_memos
+  result = settings.db.exec('SELECT * FROM memos ORDER BY created_at DESC;').to_a
+  settings.set :memos, result
+end
+
+def find_memo_by_id(id)
+  settings.db.exec_params('SELECT * FROM memos WHERE id = $1', [id])
+end
+
 configure do
   db_settings = YAML.load(File.read('database.yml'))[ENV['RACK_ENV']]
   set :db, PG.connect(
@@ -15,7 +24,7 @@ configure do
     password: db_settings['db_password'],
     dbname: db_settings['db_name']
   )
-  set :memos, settings.db.exec('SELECT * FROM memos').to_a
+  load_memos
 end
 
 get '/' do
@@ -23,7 +32,7 @@ get '/' do
 end
 
 get '/memos/new' do
-  erb :newentry
+  erb :new_entry
 end
 
 get '/memos' do
@@ -33,25 +42,25 @@ end
 
 get '/memos/:id' do
   id = params[:id]
-  memo = settings.memos.find { |m| m['id'] == id }
-  if memo
-    @title = memo['title']
-    @content = memo['content']
+  result = find_memo_by_id(id)
+
+  if result.num_tuples == 1
+    @memo = result[0]
     erb :detail
   else
     status 404
   end
 end
 
-post '/memos/new' do
-  maxid = 0
-  settings.memos.each do |m|
-    id = m['id'].to_i
-    maxid = id if id > maxid
-  end
+post '/memos' do
+  max_id = settings.db.exec('SELECT max(id) FROM memos').getvalue(0, 0)
+  new_id = max_id.to_i + 1
+
+  settings.memos.clear
+  load_memos
 
   new_memo = {
-    'id' => (maxid + 1).to_s,
+    'id' => new_id.to_s,
     'title' => params[:title],
     'content' => params[:content]
   }
@@ -64,17 +73,20 @@ end
 
 get '/memos/:id/edit' do
   id = params[:id]
-  memo = settings.memos.find { |m| m['id'] == id }
-  @title = memo['title']
-  @content = memo['content']
-  erb :edit
+  result = find_memo_by_id(id)
+
+  if result.num_tuples.positive?
+    @memo = result[0]
+    erb :edit
+  end
 end
 
 patch '/memos/:id' do
   id = params[:id]
-  memo = settings.memos.find { |m| m['id'] == id }
+  result = find_memo_by_id(id)
 
-  if memo
+  if result.num_tuples == 1
+    memo = result[0]
     memo['title'] = params[:title]
     memo['content'] = params[:content]
 
@@ -86,8 +98,10 @@ end
 
 delete '/memos/:id' do
   id = params[:id]
-  settings.memos.reject! { |m| m['id'] == id }
-  settings.db.exec_params('DELETE FROM memos WHERE id = $1', [id])
+  result = find_memo_by_id(id)
+
+  settings.db.exec_params('DELETE FROM memos WHERE id = $1', [id]) if result.num_tuples == 1
+  load_memos
 
   redirect '/memos'
 end
