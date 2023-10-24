@@ -16,6 +16,7 @@ def find_memo_by_id(id)
 end
 
 configure do
+  set :public_folder, proc { File.join(root, 'static') }
   db_settings = YAML.load(File.read('database.yml'))[ENV['RACK_ENV']]
   set :db, PG.connect(
     host: db_settings['db_host'],
