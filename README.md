@@ -16,7 +16,7 @@
 # インストール
 `git clone`をしてください。
 ```bash
-$ git clone https://github.com/sharoa119/Public.git
+$ git clone https://github.com/sharoa119/MemoApp.git
 ```
 
 カレントディレクトリに移動します。

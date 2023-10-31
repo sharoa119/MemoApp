@@ -1,18 +1,16 @@
 <div>
   <p><%= CGI.escapeHTML(@memo['title']) %></p>
   <p><%= CGI.escapeHTML(@memo['content']).gsub("\n", '<br>') %></p>
-  <br>
 </div>
 <div class="button-container">
-  <form action="/memos/<%= params[:id] %>/edit" method="get">
-    <input class="button" type="submit" value="Edit">
+  <form class="edit-form" action="/memos/<%= @memo['id'] %>/edit" method="get">
+    <input type="submit" value="Edit">
   </form>
-  <form action="/memos/<%= params[:id] %>" method="post">
+  <form class="delete-form" action="/memos/<%= @memo['id'] %>" method="post">
     <input type="hidden" name="_method" value="delete">
-    <input class="button" type="submit" value="Delete">
+    <input type="submit" value="Delete">
   </form>
 </div>
-<div>
-  <br>
-  <a class="button" href="/memos" role="button">Back</a>
+<div class="back-button">
+  <a href="/memos" role="button">Back</a>
 </div>

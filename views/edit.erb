@@ -1,10 +1,14 @@
-<form action="/memos/<%= params[:id] %>" method="post">
-  <label for="title">title</label><br>
-  <input type="text" name="title" value="<%= CGI.escapeHTML(@memo['title']) %>">
+<form action="/memos/<%= @memo['id'] %>" method="post" class="memo-form">
+  <p>
+    <label for="title">title</label><br>
+    <input required type="text" name="title" id="title" class="form-input"
+      value="<%= CGI.escapeHTML(@memo['title']) %>">
+  </p>
   <p>
     <label for="content">content</label><br>
-    <textarea name="content" cols="40" rows="8"><%= CGI.escapeHTML(@memo['content']).gsub("\n", '<br>') %></textarea>
-    <input type="hidden" name="_method" value="patch">
-    <input type="submit" value="Go">
+    <textarea name="content" id="content" class="form-textarea" cols="40"
+      rows="8"><%= CGI.escapeHTML(@memo['content']).gsub("\n", '<br>') %></textarea>
   </p>
+  <input type="hidden" name="_method" value="patch">
+  <input type="submit" value="Go" class="form-button">
 </form>
