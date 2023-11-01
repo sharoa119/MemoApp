@@ -20,7 +20,18 @@ def connection
 end
 
 def retrieve_all_memos
-  connection.exec('SELECT * FROM memos ORDER BY created_at DESC')
+  result = connection.exec('SELECT * FROM memos ORDER BY created_at DESC')
+  memos = []
+
+  result.each do |memo_data|
+    memos << {
+      'id' => memo_data['id'],
+      'title' => memo_data['title'],
+      'content' => memo_data['content']
+    }
+  end
+
+  memos
 end
 
 def retrieve_memo(id)
@@ -76,7 +87,12 @@ end
 
 get '/memos/:id/edit' do
   @memo = retrieve_memo(params[:id])
-  erb :edit if @memo
+
+  if @memo
+    erb :edit
+  else
+    status 404
+  end
 end
 
 patch '/memos/:id' do
