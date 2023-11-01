@@ -7,8 +7,10 @@ require 'pg'
 require 'yaml'
 
 def connection
+  return @db_connection if defined?(@db_connection) && @db_connection
+
   db_settings = YAML.load(File.read('database.yml'))[ENV['RACK_ENV']]
-  PG.connect(
+  @db_connection = PG.connect(
     host: db_settings['db_host'],
     port: db_settings['db_port'],
     user: db_settings['db_user'],
