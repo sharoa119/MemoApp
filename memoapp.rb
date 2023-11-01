@@ -32,12 +32,11 @@ def retrieve_memo(id)
 end
 
 def create_memo(title, content)
-  id = connection.exec('SELECT nextval(\'memos_id_seq\')').getvalue(0, 0)
-  connection.exec_params('INSERT INTO memos (id, title, content) VALUES ($1, $2, $3)', [id, title, content])
+  connection.exec_params('INSERT INTO memos (title, content) VALUES ($1, $2)', [title, content])
 end
 
-def edit_memo(title, content, id)
-  connection.exec_params('UPDATE memos SET title = $1, content = $2 WHERE id = $3', [title, content, id])
+def edit_memo(id, title, content)
+  connection.exec_params('UPDATE memos SET title = $2, content = $3 WHERE id = $1', [id, title, content])
 end
 
 def delete_memo(id)
@@ -81,9 +80,7 @@ get '/memos/:id/edit' do
 end
 
 patch '/memos/:id' do
-  title = params[:title]
-  content = params[:content]
-  edit_memo(title, content, params[:id].to_i)
+  edit_memo(params[:id], params[:title], params[:content])
 
   redirect "/memos/#{params[:id]}"
 end
