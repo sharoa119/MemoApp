@@ -1,10 +1,10 @@
 <ul>
   <% @memos.each do |memo| %>
-  <li>
-    <a class="memo-link" href="/memos/<%= memo['id'] %>">
-      <span><%= CGI.escapeHTML(memo['title']) %></span>
-    </a>
-  </li>
+    <li>
+      <a class="memo-link" href="/memos/<%= memo['id'] %>">
+        <span><%= CGI.escapeHTML(memo['title']) %></span>
+      </a>
+    </li>
   <% end %>
 </ul>
 <div>

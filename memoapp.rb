@@ -17,11 +17,11 @@ def connection
   )
 end
 
-def fetch_memo
+def retrieve_all_memos
   connection.exec('SELECT * FROM memos ORDER BY created_at DESC')
 end
 
-def read_memo(id)
+def retrieve_memo(id)
   result = connection.exec_params('SELECT * FROM memos WHERE id = $1', [id])
   return nil if result.num_tuples.zero?
 
@@ -51,12 +51,12 @@ get '/memos/new' do
 end
 
 get '/memos' do
-  @memos = fetch_memo
+  @memos = retrieve_all_memos
   erb :index
 end
 
 get '/memos/:id' do
-  @memo = read_memo(params[:id])
+  @memo = retrieve_memo(params[:id])
 
   if @memo
     erb :detail
@@ -74,7 +74,7 @@ post '/memos' do
 end
 
 get '/memos/:id/edit' do
-  @memo = read_memo(params[:id])
+  @memo = retrieve_memo(params[:id])
   erb :edit if @memo
 end
 
