@@ -7,7 +7,7 @@ require 'pg'
 require 'yaml'
 
 def connection
-  return @db_connection if defined?(@db_connection) && @db_connection
+  return @db_connection if @db_connection
 
   db_settings = YAML.load(File.read('database.yml'))[ENV['RACK_ENV']]
   @db_connection = PG.connect(
