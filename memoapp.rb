@@ -24,11 +24,7 @@ def retrieve_all_memos
   memos = []
 
   result.each do |memo_data|
-    memos << {
-      'id' => memo_data['id'],
-      'title' => memo_data['title'],
-      'content' => memo_data['content']
-    }
+    memos << memo_data
   end
 
   memos
@@ -38,15 +34,14 @@ def retrieve_memo(id)
   result = connection.exec_params('SELECT * FROM memos WHERE id = $1', [id])
   return nil if result.num_tuples.zero?
 
-  memo_data = result[0]
-  { 'id' => memo_data['id'], 'title' => memo_data['title'], 'content' => memo_data['content'] }
+  result[0]
 end
 
 def create_memo(title, content)
   connection.exec_params('INSERT INTO memos (title, content) VALUES ($1, $2)', [title, content])
 end
 
-def edit_memo(id, title, content)
+def edit_memo(title, content, id)
   connection.exec_params('UPDATE memos SET title = $2, content = $3 WHERE id = $1', [title, content, id])
 end
 
