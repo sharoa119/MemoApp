@@ -47,7 +47,7 @@ def create_memo(title, content)
 end
 
 def edit_memo(id, title, content)
-  connection.exec_params('UPDATE memos SET title = $2, content = $3 WHERE id = $1', [id, title, content])
+  connection.exec_params('UPDATE memos SET title = $2, content = $3 WHERE id = $1', [title, content, id])
 end
 
 def delete_memo(id)
@@ -78,9 +78,7 @@ get '/memos/:id' do
 end
 
 post '/memos' do
-  title = params[:title]
-  content = params[:content]
-  create_memo(title, content)
+  create_memo(params[:title], params[:content])
 
   redirect '/memos'
 end
