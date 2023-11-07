@@ -7,16 +7,16 @@ require 'pg'
 require 'yaml'
 
 def connection
-  return @db_connection if @db_connection
-
-  db_settings = YAML.load(File.read('database.yml'))[ENV['RACK_ENV']]
-  @db_connection = PG.connect(
-    host: db_settings['db_host'],
-    port: db_settings['db_port'],
-    user: db_settings['db_user'],
-    password: db_settings['db_password'],
-    dbname: db_settings['db_name']
-  )
+  @connection ||= begin
+    db_settings = YAML.load(File.read('database.yml'))[ENV['RACK_ENV']]
+    PG.connect(
+      host: db_settings['db_host'],
+      port: db_settings['db_port'],
+      user: db_settings['db_user'],
+      password: db_settings['db_password'],
+      dbname: db_settings['db_name']
+    )
+  end
 end
 
 def retrieve_all_memos
