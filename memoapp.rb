@@ -41,8 +41,8 @@ def create_memo(title, content)
   connection.exec_params('INSERT INTO memos (title, content) VALUES ($1, $2)', [title, content])
 end
 
-def edit_memo(title, content, id)
-  connection.exec_params('UPDATE memos SET title = $2, content = $3 WHERE id = $1', [title, content, id])
+def edit_memo(id, title, content)
+  connection.exec_params('UPDATE memos SET title = $1, content = $2 WHERE id = $3', [title, content, id])
 end
 
 def delete_memo(id)
