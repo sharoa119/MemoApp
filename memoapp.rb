@@ -59,6 +59,7 @@ end
 
 get '/memos' do
   @memos = retrieve_all_memos
+
   erb :index
 end
 
@@ -96,6 +97,7 @@ end
 
 delete '/memos/:id' do
   delete_memo(params[:id])
+
   redirect '/memos'
 end
 
