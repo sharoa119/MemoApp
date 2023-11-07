@@ -21,13 +21,9 @@ end
 
 def retrieve_all_memos
   result = connection.exec('SELECT * FROM memos ORDER BY created_at DESC')
-  memos = []
-
-  result.each do |memo_data|
-    memos << memo_data
+  result.map do |memo_data|
+    memo_data
   end
-
-  memos
 end
 
 def retrieve_memo(id)
