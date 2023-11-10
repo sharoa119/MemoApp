@@ -20,9 +20,7 @@ def connection
 end
 
 def retrieve_all_memos
-  connection.exec('SELECT * FROM memos ORDER BY created_at DESC').map do |result|
-    result
-  end
+  connection.exec('SELECT * FROM memos ORDER BY created_at DESC').to_a
 end
 
 def retrieve_memo(id)
