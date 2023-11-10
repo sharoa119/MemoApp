@@ -2,107 +2,98 @@
 
 require 'sinatra'
 require 'sinatra/reloader'
-require 'json'
 require 'cgi'
+require 'pg'
+require 'yaml'
 
-PATH = 'public/memoapp.json'
-
-def load_memos(path)
-  File.open(path) do |file|
-    JSON.parse(file.read)
+def connection
+  @connection ||= begin
+    db_settings = YAML.load(File.read('database.yml'))[ENV['RACK_ENV']]
+    PG.connect(
+      host: db_settings['db_host'],
+      port: db_settings['db_port'],
+      user: db_settings['db_user'],
+      password: db_settings['db_password'],
+      dbname: db_settings['db_name']
+    )
   end
+end
+
+def retrieve_all_memos
+  connection.exec('SELECT * FROM memos ORDER BY created_at DESC').to_a
+end
+
+def retrieve_memo(id)
+  result = connection.exec_params('SELECT * FROM memos WHERE id = $1', [id])
+  return nil if result.num_tuples.zero?
+
+  result[0]
+end
+
+def create_memo(title, content)
+  connection.exec_params('INSERT INTO memos (title, content) VALUES ($1, $2)', [title, content])
+end
+
+def edit_memo(id, title, content)
+  connection.exec_params('UPDATE memos SET title = $1, content = $2 WHERE id = $3', [title, content, id])
+end
+
+def delete_memo(id)
+  connection.exec_params('DELETE FROM memos WHERE id = $1', [id])
 end
 
 get '/' do
   redirect '/memos'
 end
 
+get '/memos/new' do
+  erb :new_entry
+end
+
 get '/memos' do
-  @memos = load_memos(PATH)
+  @memos = retrieve_all_memos
+
   erb :index
 end
 
 get '/memos/:id' do
-  id = params[:id]
-  memos = load_memos(PATH)
+  @memo = retrieve_memo(params[:id])
 
-  memo = memos.find { |m| m['id'] == id }
-  if memo
-    @title = memo['title']
-    @content = memo['content']
+  if @memo
     erb :detail
   else
     status 404
   end
 end
 
-get '/new' do
-  erb :newentry
-end
-
-def save_memos(path, memos)
-  File.open(path, 'wb') do |file|
-    JSON.dump(memos, file)
-  end
-end
-
 post '/memos' do
-  maxid = 0
-  memos = load_memos(PATH)
-  memos.each do |m|
-    id = m['id'].to_i
-    maxid = id if id > maxid
-  end
-
-  new_memo = {
-    'id' => (maxid + 1).to_s,
-    'title' => params[:title],
-    'content' => params[:content]
-  }
-
-  memos << new_memo
-  save_memos(PATH, memos)
+  create_memo(params[:title], params[:content])
 
   redirect '/memos'
 end
 
 get '/memos/:id/edit' do
-  id = params[:id]
-  memos = load_memos(PATH)
+  @memo = retrieve_memo(params[:id])
 
-  memo = memos.find { |m| m['id'] == id }
-
-  @title = memo['title']
-  @content = memo['content']
-  erb :edit
+  if @memo
+    erb :edit
+  else
+    status 404
+  end
 end
 
 patch '/memos/:id' do
-  id = params[:id]
-  memos = load_memos(PATH)
+  edit_memo(params[:id], params[:title], params[:content])
 
-  memo = memos.find { |m| m['id'] == id }
-  if memo
-    memo['title'] = params[:title]
-    memo['content'] = params[:content]
-
-    save_memos(PATH, memos)
-  end
-
-  redirect "/memos/#{id}"
+  redirect "/memos/#{params[:id]}"
 end
 
 delete '/memos/:id' do
-  id = params[:id]
-  memos = load_memos(PATH)
-
-  memos.reject! { |m| m['id'] == id }
-
-  save_memos(PATH, memos)
+  delete_memo(params[:id])
 
   redirect '/memos'
 end
 
 not_found do
-  'This is nowhere to be found.'
+  'Page not found!'
 end

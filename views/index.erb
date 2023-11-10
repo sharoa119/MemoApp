@@ -1,13 +1,12 @@
 <ul>
   <% @memos.each do |memo| %>
     <li>
-      <h4>
-      <a href="/memos/<%= memo['id'] %>"><%= CGI.escapeHTML(memo['title']) %></a>
-      </h4>
+      <a class="memo-link" href="/memos/<%= memo['id'] %>">
+        <span><%= CGI.escapeHTML(memo['title']) %></span>
+      </a>
     </li>
   <% end %>
 </ul>
-<br>
 <div>
-<a class="btn btn-primary" href="/new" style="width:150px; padding:5px; background:HotPink;color:#ffffff;" role="button">New</a>
-<div>
+  <a class="new-memo-button" href="/memos/new">New</a>
+</div>
